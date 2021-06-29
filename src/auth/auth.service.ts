@@ -16,7 +16,7 @@ export class AuthService {
   public async signUp(createUserDto: CreateUserDto) {
     const hashedPassword = await hash(createUserDto.password, 10);
 
-    await this.validateEmail(createUserDto.email);
+    await this.usersService.checkEmailExists(createUserDto.email);
 
     const createdUser = await this.usersService.create({
       ...createUserDto,
@@ -38,17 +38,6 @@ export class AuthService {
     } catch {
       throw new HttpException(
         'Wrong credentials provided',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
-  private async validateEmail(email: string) {
-    const checkEmailExists = await this.usersService.getByEmail(email);
-
-    if (checkEmailExists) {
-      throw new HttpException(
-        'User with that email already exists',
         HttpStatus.BAD_REQUEST,
       );
     }
