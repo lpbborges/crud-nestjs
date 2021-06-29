@@ -29,11 +29,15 @@ export class UsersService {
     return this.userModel.find();
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
+    await this.checkUserExistsById(id);
+
     return this.userModel.findById(id);
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    await this.checkUserExistsById(id);
+
     return this.userModel.findByIdAndUpdate(
       {
         _id: id,
@@ -47,11 +51,21 @@ export class UsersService {
     );
   }
 
-  remove(id: string) {
-    return this.userModel
+  async remove(id: string) {
+    await this.checkUserExistsById(id);
+
+    this.userModel
       .deleteOne({
         _id: id,
       })
       .exec();
+  }
+
+  private async checkUserExistsById(id: string) {
+    const user = await this.userModel.findById(id);
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
   }
 }
