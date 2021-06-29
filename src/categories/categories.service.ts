@@ -12,39 +12,44 @@ export class CategoriesService {
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
   ) {}
 
-  create(createCategoryDto: CreateCategoryDto) {
+  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
     const category = new this.categoryModel(createCategoryDto);
 
     return category.save();
   }
 
-  findAll() {
-    return this.categoryModel.find();
+  async findAll(): Promise<Category[]> {
+    return this.categoryModel.find().exec();
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<Category> {
     await this.checkCategoryExistsById(id);
 
-    return this.categoryModel.findById(id);
+    return this.categoryModel.findById(id).exec();
   }
 
-  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+  async update(
+    id: string,
+    updateCategoryDto: UpdateCategoryDto,
+  ): Promise<Category> {
     await this.checkCategoryExistsById(id);
 
-    return this.categoryModel.findByIdAndUpdate(
-      {
-        _id: id,
-      },
-      {
-        $set: updateCategoryDto,
-      },
-      {
-        new: true,
-      },
-    );
+    return this.categoryModel
+      .findByIdAndUpdate(
+        {
+          _id: id,
+        },
+        {
+          $set: updateCategoryDto,
+        },
+        {
+          new: true,
+        },
+      )
+      .exec();
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<void> {
     await this.checkCategoryExistsById(id);
 
     this.categoryModel
@@ -54,7 +59,7 @@ export class CategoriesService {
       .exec();
   }
 
-  private async checkCategoryExistsById(id: string) {
+  private async checkCategoryExistsById(id: string): Promise<void> {
     const category = await this.categoryModel.findById(id);
 
     if (!category) {
